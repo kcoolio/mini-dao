@@ -126,13 +126,6 @@ For support or feedback, please open a [GitHub Issue](https://github.com/kcoolio
 
 ```
 
----
-
-Let me know if you'd like to customize any of the placeholders like:
-- `yourusername`
-- Links to actual deployed contracts
-- Instructions for using with Soroban CLI or testnet
-
 Or if you'd like a sample `LICENSE` or `.github/workflows` setup as well.
 ```
 
