@@ -29,9 +29,6 @@ mini-dao\_contract/
 ├── Cargo.toml         # Rust and Soroban project config
 └── src/
 ├── lib.rs         # Main contract logic
-├── types.rs       # Data structures (Holder, Proposal, etc.)
-├── storage.rs     # Storage abstraction helpers
-├── errors.rs      # Custom error types
 └── test.rs        # Unit tests
 
 ````
@@ -126,7 +123,6 @@ For support or feedback, please open a [GitHub Issue](https://github.com/kcoolio
 
 ```
 
-Or if you'd like a sample `LICENSE` or `.github/workflows` setup as well.
 ```
 
 
