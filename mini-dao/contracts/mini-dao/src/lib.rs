@@ -1,5 +1,6 @@
 use soroban_sdk::{
-    contract, contractimpl, contracttype, token, Address, BytesN, Env, Map, Symbol, Val, Vec,
+    contract, contractimpl, contracttype, token, Address, BytesN, Env, Map, Symbol, TryFromVal,
+    Val, Vec,
 };
 
 #[contracttype]
@@ -223,7 +224,66 @@ impl MiniDao {
     // add a means for a user to add themselves tokens in the dao
 
     // Execute a proposal if it has enough votes
+    pub fn execute_proposal(env: Env, caller: Address, proposal_id: u32) {
+        caller.require_auth();
+
+        // Get proposal
+        let mut proposals: Map<u32, Proposal> =
+            env.storage().instance().get(&DataKey::Proposals).unwrap();
+        if !env.storage().instance().has(&proposal_id) {
+            panic!("Proposal does not exist");
+        }
+
+        let mut proposal = proposals.get(proposal_id).unwrap();
+
+        // Check if proposal is still active
+        let current_time = env.ledger().timestamp();
+        if current_time > proposal.deadline {
+            panic!("Proposal deadline has passed");
+        }
+
+        // Determine if the proposal passes (simple majority)
+        if proposal.votes_for > proposal.votes_against {
+            // Execute the proposal by calling the specified function
+            let target_client: Symbol = env.invoke_contract(
+                &proposal.target,
+                &proposal.function,
+                proposal.parameters.clone(),
+            );
+
+            // Update proposal status
+            proposal.status = ProposalStatus::Executed;
+        } else {
+            // Update proposal status to rejected
+            proposal.status = ProposalStatus::Rejected;
+        }
+
+        // Update storage
+        proposals.set(proposal_id, proposal);
+        env.storage()
+            .instance()
+            .set(&DataKey::Proposals, &proposals);
+    }
     // View functions
+    pub fn get_member(env: Env, address: Address) -> Option<Member> {
+        let members: Map<Address, Member> =
+            env.storage().instance().get(&DataKey::Members).unwrap();
+        if env.storage().instance().has(&address) {
+            Some(members.get(address).unwrap())
+        } else {
+            None
+        }
+    }
+
+    pub fn get_proposal(env: Env, proposal_id: u32) -> Option<Proposal> {
+        let proposals: Map<u32, Proposal> =
+            env.storage().instance().get(&DataKey::Proposals).unwrap();
+        if env.storage().instance().has(&proposal_id) {
+            Some(proposals.get(proposal_id).unwrap())
+        } else {
+            None
+        }
+    }
 }
 
 mod test;
